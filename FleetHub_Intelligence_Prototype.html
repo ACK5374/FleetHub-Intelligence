@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FleetHub Intelligence – Interaktiver Siemens Prototyp</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:rgba(255,255,255,.78); --cardSolid:#fff; --text:#1d1d1f; --muted:#6e6e73;
+  --line:rgba(0,0,0,.09); --blue:#0071e3; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --purple:#bf5af2;
+  --shadow:0 22px 60px rgba(0,0,0,.10); --soft:0 12px 30px rgba(0,0,0,.07);
+  --r:30px; --r2:22px; --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font);color:var(--text);background:
+  radial-gradient(circle at 6% 4%,rgba(0,113,227,.20),transparent 30rem),
+  radial-gradient(circle at 78% 0%,rgba(48,209,88,.14),transparent 26rem),
+  radial-gradient(circle at 98% 48%,rgba(191,90,242,.10),transparent 34rem),var(--bg)}
+button,input{font-family:inherit}
+.wrap{width:min(1460px,calc(100vw - 38px));margin:auto;padding:20px 0 50px}
+.top{position:sticky;top:12px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 14px 11px 18px;border-radius:999px;background:rgba(255,255,255,.76);border:1px solid rgba(255,255,255,.72);box-shadow:0 12px 38px rgba(0,0,0,.08);backdrop-filter:blur(28px) saturate(1.4)}
+.brand{display:flex;align-items:center;gap:12px;min-width:250px}.mark{width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,#0071e3,#30d158);box-shadow:inset 0 1px rgba(255,255,255,.6),0 10px 24px rgba(0,113,227,.25);position:relative}.mark:after{content:"";position:absolute;inset:9px;border:2px solid white;border-radius:7px}.brand b{display:block;font-size:16px;letter-spacing:-.02em}.brand span{display:block;font-size:12px;color:var(--muted);font-weight:650}
+.switch{display:flex;gap:6px;padding:5px;border-radius:999px;background:rgba(118,118,128,.12);overflow:auto}.roleBtn{border:0;background:transparent;border-radius:999px;padding:10px 15px;font-weight:740;font-size:14px;color:#3a3a3c;white-space:nowrap;cursor:pointer}.roleBtn.active{background:white;color:var(--text);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.live{display:flex;align-items:center;gap:8px;border-radius:999px;padding:10px 13px;background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.28);color:#167c31;font-size:13px;font-weight:780;white-space:nowrap}.pulse{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(48,209,88,.5);animation:pulse 1.6s infinite}@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(48,209,88,0)}}
+.hero{display:grid;grid-template-columns:1.04fr .96fr;gap:22px;margin:30px 0 18px}.glass{background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.48));border:1px solid rgba(255,255,255,.75);border-radius:34px;box-shadow:var(--shadow);backdrop-filter:blur(24px)}
+.heroCopy{padding:46px 44px;min-height:398px}.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:9px 12px;margin-bottom:18px;border-radius:999px;background:rgba(0,113,227,.10);border:1px solid rgba(0,113,227,.18);color:#006edb;font-weight:820;font-size:13px}
+h1{font-size:clamp(48px,6vw,82px);line-height:.92;letter-spacing:-.07em;margin:0 0 18px;font-weight:870}.hero p{font-size:20px;line-height:1.42;color:#4b4b50;margin:0;max-width:780px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 13px;background:rgba(255,255,255,.76);border:1px solid var(--line);font-weight:720;font-size:14px}.dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.preview{overflow:hidden;min-height:398px}.chrome{height:48px;display:flex;align-items:center;gap:8px;padding:0 17px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.54)}.traffic{width:11px;height:11px;border-radius:50%;background:#ff5f57}.traffic:nth-child(2){background:#ffbd2e}.traffic:nth-child(3){background:#28c840}.addr{flex:1;margin-left:10px;border-radius:999px;background:rgba(118,118,128,.12);padding:7px 12px;text-align:center;color:var(--muted);font-size:12px;font-family:var(--mono)}
+.previewGrid{padding:25px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.mini{border-radius:22px;background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.78);padding:18px;box-shadow:var(--soft);min-height:132px}.mini.wide{grid-column:1/-1}.label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:820}.val{font-size:34px;font-weight:870;letter-spacing:-.045em;margin-top:8px}.val small{font-size:13px;color:#167c31}.flow{height:42px;display:flex;gap:5px;align-items:end;margin-top:14px}.flow i{flex:1;border-radius:999px;background:linear-gradient(180deg,rgba(0,113,227,.85),rgba(0,113,227,.18));animation:breathe 2.8s ease-in-out infinite}.flow i:nth-child(2n){animation-delay:.2s}@keyframes breathe{50%{transform:scaleY(.86);opacity:.82}}
+.better{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}.betterCard{border-radius:24px;padding:19px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.75);box-shadow:var(--soft);min-height:160px}.ico{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;color:white;font-weight:880;background:linear-gradient(135deg,var(--blue),#64d2ff);margin-bottom:13px}.betterCard:nth-child(2) .ico{background:linear-gradient(135deg,#30d158,#0a84ff)}.betterCard:nth-child(3) .ico{background:linear-gradient(135deg,#bf5af2,#64d2ff)}.betterCard:nth-child(4) .ico{background:linear-gradient(135deg,#ff9f0a,#ff453a)}.betterCard:nth-child(5) .ico{background:linear-gradient(135deg,#1d1d1f,#6e6e73)}.betterCard h3{margin:0 0 7px;font-size:17px;letter-spacing:-.02em}.betterCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.38}
+.dash{border-radius:34px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.76);box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(28px) saturate(1.35)}.dashHead{display:flex;justify-content:space-between;gap:18px;padding:28px 30px 18px;border-bottom:1px solid var(--line)}.dash h2{font-size:38px;line-height:1;letter-spacing:-.045em;margin:0 0 8px}.dashHead p{margin:0;color:var(--muted);line-height:1.42;max-width:790px}.badge{border-radius:999px;background:rgba(0,113,227,.10);border:1px solid rgba(0,113,227,.18);color:#0057b8;padding:11px 14px;font-weight:800;white-space:nowrap}
+.body{display:grid;grid-template-columns:286px 1fr;min-height:775px}.side{padding:22px;border-right:1px solid var(--line);background:rgba(255,255,255,.34)}.sideLabel{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:820;margin:0 0 10px}
+.module{width:100%;display:flex;gap:10px;align-items:center;text-align:left;border:0;background:transparent;padding:11px 10px;border-radius:14px;font-weight:740;margin-bottom:5px;color:var(--text);cursor:pointer}.module.active{background:rgba(0,113,227,.10);color:#0057b8}.sdot{width:9px;height:9px;border-radius:50%;background:var(--blue);flex:0 0 9px}.module:nth-child(3) .sdot{background:var(--green)}.module:nth-child(4) .sdot{background:var(--orange)}.module:nth-child(5) .sdot{background:var(--purple)}
+.scope{margin-top:22px;border-radius:20px;padding:16px;background:#1d1d1f;color:white;box-shadow:0 14px 30px rgba(0,0,0,.16)}.scope h4{margin:0 0 10px}.scopeLine{display:flex;gap:8px;align-items:flex-start;margin:8px 0;color:rgba(255,255,255,.75);font-size:13px;line-height:1.32}.check{width:16px;height:16px;flex:0 0 16px;border-radius:50%;display:grid;place-items:center;font-size:10px;background:rgba(48,209,88,.22);color:#7bf091;font-weight:900}
+.workspace{padding:24px;display:grid;grid-template-columns:1fr 372px;gap:18px;align-content:start}.mainGrid{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;align-content:start}.card{background:rgba(255,255,255,.77);border:1px solid rgba(255,255,255,.78);border-bottom-color:rgba(0,0,0,.08);box-shadow:0 10px 24px rgba(0,0,0,.06);border-radius:24px;padding:20px;overflow:hidden}.card.full{grid-column:1/-1}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}.card h3{margin:0;font-size:21px;letter-spacing:-.025em}.sub{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.35}.tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 9px;background:rgba(0,113,227,.10);border:1px solid rgba(0,113,227,.14);color:#006edb;font-size:12px;font-weight:820;white-space:nowrap}.tag.green{background:rgba(48,209,88,.12);border-color:rgba(48,209,88,.18);color:#167c31}.tag.orange{background:rgba(255,159,10,.14);border-color:rgba(255,159,10,.25);color:#a25c00}.tag.red{background:rgba(255,69,58,.12);border-color:rgba(255,69,58,.20);color:#b42318}.tag.gray{background:rgba(118,118,128,.12);border-color:rgba(118,118,128,.16);color:#4b4b50}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border-radius:18px;padding:15px;background:rgba(118,118,128,.09);min-height:96px}.kpi .label{font-size:11px}.kpi b{display:block;font-size:28px;letter-spacing:-.04em;margin-top:8px}.kpi small{color:#167c31;font-weight:800}
+.list{display:grid;gap:11px}.item{display:grid;grid-template-columns:42px 1fr auto;gap:13px;align-items:center;border-radius:18px;padding:14px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.035)}.itemIcon{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),#64d2ff);color:white;font-weight:870}.item:nth-child(2) .itemIcon{background:linear-gradient(135deg,#30d158,#0a84ff)}.item:nth-child(3) .itemIcon{background:linear-gradient(135deg,#ff9f0a,#ff453a)}.item:nth-child(4) .itemIcon{background:linear-gradient(135deg,#bf5af2,#0a84ff)}.item h4{margin:0 0 3px;font-size:15px}.item p{margin:0;color:var(--muted);font-size:13px;line-height:1.34}.cta{border:0;border-radius:999px;background:#0071e3;color:white;padding:9px 12px;font-weight:820;cursor:pointer;white-space:nowrap}.cta.secondary{background:rgba(118,118,128,.14);color:var(--text)}.cta.green{background:#1f9d42}.cta:active{transform:scale(.98)}
+.map{height:330px;border-radius:22px;background:linear-gradient(135deg,rgba(0,113,227,.16),rgba(48,209,88,.08)),repeating-linear-gradient(45deg,rgba(0,0,0,.035) 0 1px,transparent 1px 18px);border:1px solid rgba(0,0,0,.06);position:relative;overflow:hidden}.map:before{content:"Dortmund · München · Berlin · Hamburg";position:absolute;left:18px;top:14px;font-size:12px;font-weight:780;color:rgba(0,0,0,.42)}.pin{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--blue);border:3px solid white;box-shadow:0 8px 16px rgba(0,113,227,.25);cursor:pointer}.pin.green{background:var(--green)}.pin.orange{background:var(--orange)}.pin.red{background:var(--red)}.pin.privacy{background:#86868b}.route{position:absolute;height:2px;background:rgba(0,113,227,.28);transform-origin:left;border-radius:999px}
+.table{display:grid;gap:9px}.row{display:grid;grid-template-columns:1.1fr .8fr .7fr auto;gap:10px;align-items:center;padding:12px;border-radius:16px;background:rgba(118,118,128,.08);cursor:pointer}.row:hover{background:rgba(0,113,227,.08)}.row h4{margin:0;font-size:14px}.row p{margin:3px 0 0;color:var(--muted);font-size:12px}.metric{font-weight:820}.muted{color:var(--muted)}
+.docs{display:grid;gap:11px}.doc{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:13px;border-radius:18px;background:rgba(118,118,128,.08)}.docIcon{width:42px;height:42px;border-radius:14px;background:rgba(0,113,227,.12);color:#0071e3;display:grid;place-items:center;font-weight:850}.doc h4{margin:0 0 3px;font-size:15px}.doc p{margin:0;color:var(--muted);font-size:12px;line-height:1.25}
+.phone{max-width:360px;margin:auto;border-radius:44px;padding:14px;background:#1d1d1f;box-shadow:0 24px 70px rgba(0,0,0,.25)}.screen{min-height:640px;border-radius:34px;background:radial-gradient(circle at 20% 0%,rgba(0,113,227,.20),transparent 18rem),#fbfbfd;padding:18px;overflow:hidden}.phoneTop{display:flex;justify-content:space-between;font-size:12px;font-weight:760;margin-bottom:20px}.vehicle{border-radius:28px;padding:22px;background:#1d1d1f;color:white;position:relative;overflow:hidden;margin-bottom:14px}.vehicle:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(0,113,227,.40);top:-70px;right:-50px;filter:blur(10px)}.vehicle h3,.vehicle p,.vm{position:relative}.vehicle h3{margin:0 0 4px;font-size:25px}.vehicle p{margin:0;color:rgba(255,255,255,.65)}.vm{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px}.vm div{border-radius:18px;padding:13px;background:rgba(255,255,255,.12)}.vm b{display:block;font-size:21px}.vm span{font-size:12px;color:rgba(255,255,255,.65)}.action{border-radius:24px;background:white;padding:18px;margin-bottom:12px;border:1px solid rgba(0,0,0,.06);box-shadow:0 12px 28px rgba(0,0,0,.05)}.action h4{margin:0 0 6px}.action p{margin:0 0 13px;color:var(--muted);font-size:13px;line-height:1.35}.privacyBox{border-radius:22px;padding:16px;background:rgba(48,209,88,.13);border:1px solid rgba(48,209,88,.20);color:#167c31;font-weight:760;font-size:14px;line-height:1.34}
+.customers{display:grid;gap:12px}.cust{display:grid;grid-template-columns:48px 1fr auto;gap:13px;align-items:center;padding:14px;border-radius:19px;background:rgba(118,118,128,.08);cursor:pointer}.avatar{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#0071e3,#bf5af2);display:grid;place-items:center;color:white;font-weight:850}.cust h4{margin:0 0 3px}.cust p{margin:0;color:var(--muted);font-size:13px}.timeline{display:grid;gap:12px}.tr{display:grid;grid-template-columns:86px 1fr;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}.tr:last-child{border-bottom:0;padding-bottom:0}.time{color:var(--muted);font-size:12px;font-weight:820}.tr h4{margin:0 0 4px;font-size:15px}.tr p{margin:0;color:var(--muted);font-size:13px;line-height:1.34}
+.chat{align-self:start;position:sticky;top:96px}.chatBox{height:520px;display:flex;flex-direction:column}.chatHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.chatMsgs{flex:1;overflow:auto;padding:2px 2px 12px;display:flex;flex-direction:column;gap:10px}.msg{max-width:92%;border-radius:18px;padding:11px 13px;font-size:13px;line-height:1.35}.msg.bot{background:rgba(118,118,128,.10);align-self:flex-start}.msg.user{background:#0071e3;color:white;align-self:flex-end}.quick{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}.quick button{border:1px solid var(--line);background:rgba(255,255,255,.75);border-radius:999px;padding:7px 9px;font-weight:740;font-size:12px;cursor:pointer;color:#3a3a3c}.chatInput{display:flex;gap:8px}.chatInput input{flex:1;border:1px solid var(--line);border-radius:999px;padding:11px 13px;background:white;outline:none}.chatInput button{border:0;border-radius:999px;background:#0071e3;color:white;padding:0 14px;font-weight:850;cursor:pointer}
+.modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.28);backdrop-filter:blur(10px);z-index:100}.modal.open{display:grid}.modalCard{width:min(760px,calc(100vw - 28px));border-radius:30px;background:rgba(255,255,255,.92);box-shadow:0 32px 90px rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.8);padding:24px}.modalTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:16px}.close{border:0;background:rgba(118,118,128,.14);border-radius:999px;width:34px;height:34px;font-weight:850;cursor:pointer}.detailGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.detail{border-radius:18px;padding:14px;background:rgba(118,118,128,.09)}.detail .label{font-size:11px}.detail b{display:block;font-size:19px;margin-top:5px}.explain{margin-top:14px;border-radius:20px;padding:15px;background:rgba(0,113,227,.09);color:#0057b8;font-weight:710;line-height:1.38}
+.note{text-align:center;color:var(--muted);font-size:13px;margin:18px 0 0}
+
+.reportGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.reportCard{border-radius:18px;padding:15px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.04)}.reportCard h4{margin:0 0 6px;font-size:15px}.reportCard p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.35}.downloadBtn{border:0;border-radius:999px;background:#1f9d42;color:white;padding:9px 12px;font-weight:820;cursor:pointer}.downloadBtn.secondary{background:#0071e3}.downloadBtn.gray{background:rgba(118,118,128,.18);color:var(--text)}.scenarioControls{display:grid;gap:11px}.scenarioRow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px;border-radius:16px;background:rgba(118,118,128,.08)}.scenarioRow h4{margin:0 0 3px;font-size:14px}.scenarioRow p{margin:0;color:var(--muted);font-size:12px}.toggle{width:52px;height:32px;border-radius:999px;background:rgba(118,118,128,.22);padding:3px;cursor:pointer;border:0;position:relative}.toggle:after{content:"";position:absolute;width:26px;height:26px;left:3px;top:3px;border-radius:50%;background:white;box-shadow:0 3px 8px rgba(0,0,0,.18);transition:.2s}.toggle.on{background:#30d158}.toggle.on:after{left:23px}.auditTrail{display:grid;gap:9px}.auditStep{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:11px;border-radius:16px;background:rgba(118,118,128,.08)}.auditNo{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(0,113,227,.12);color:#006edb;font-weight:850;font-size:12px}.auditStep h4{margin:0 0 2px;font-size:14px}.auditStep p{margin:0;color:var(--muted);font-size:12px}.progress{height:10px;border-radius:999px;background:rgba(118,118,128,.16);overflow:hidden}.progress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#30d158,#0071e3);width:72%;transition:width .35s ease}.toast{position:fixed;right:24px;bottom:24px;z-index:120;border-radius:18px;background:rgba(29,29,31,.92);color:white;padding:14px 16px;box-shadow:0 18px 50px rgba(0,0,0,.24);display:none;max-width:360px}.toast.show{display:block;animation:toast .25s ease}@keyframes toast{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+
+.speedGrid{display:grid;gap:10px}.speedLine{display:grid;grid-template-columns:1fr 70px;gap:12px;align-items:center;padding:11px;border-radius:16px;background:rgba(118,118,128,.08)}.speedLine h4{margin:0 0 3px;font-size:14px}.speedLine p{margin:0;color:var(--muted);font-size:12px}.speedVal{font-weight:880;font-size:18px;text-align:right}.speedTrack{grid-column:1/-1;height:9px;border-radius:999px;background:rgba(118,118,128,.16);overflow:hidden}.speedTrack span{display:block;height:100%;width:45%;border-radius:999px;background:linear-gradient(90deg,#30d158,#0071e3);transition:width .45s ease}.pin.liveMove{transition:left .8s ease, top .8s ease}.reportPreview{border-radius:20px;padding:16px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.04);min-height:210px}.reportPreview h4{margin:0 0 8px;font-size:17px}.reportPreview p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.42}.reportTabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.reportTab{border:1px solid var(--line);background:white;border-radius:999px;padding:8px 10px;font-weight:820;font-size:12px;cursor:pointer}.reportTab.active{background:#0071e3;color:white;border-color:#0071e3}.reportBullets{margin:8px 0 0;padding-left:18px;color:#3a3a3c;font-size:13px;line-height:1.45}.reportBullets li{margin:5px 0}.scenarioSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.scenarioBox{border-radius:16px;padding:12px;background:white;border:1px solid rgba(0,0,0,.05)}.scenarioBox .label{font-size:10px}.scenarioBox b{display:block;margin-top:5px;font-size:18px;letter-spacing:-.03em}
+
+
+.knowledgeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px}.knowledgeCard{border-radius:18px;padding:15px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.04);cursor:pointer;transition:transform .15s ease,background .15s ease}.knowledgeCard:hover{transform:translateY(-1px);background:rgba(0,113,227,.08)}.knowledgeIcon{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;color:white;font-weight:850;background:linear-gradient(135deg,#0071e3,#64d2ff);margin-bottom:10px}.knowledgeCard:nth-child(2) .knowledgeIcon{background:linear-gradient(135deg,#30d158,#0071e3)}.knowledgeCard:nth-child(3) .knowledgeIcon{background:linear-gradient(135deg,#ff9f0a,#ff453a)}.knowledgeCard:nth-child(4) .knowledgeIcon{background:linear-gradient(135deg,#bf5af2,#0071e3)}.knowledgeCard h4{margin:0 0 5px;font-size:15px}.knowledgeCard p{margin:0;color:var(--muted);font-size:12px;line-height:1.35}.vinBox{border-radius:20px;padding:15px;background:rgba(0,113,227,.08);border:1px solid rgba(0,113,227,.14);margin-bottom:12px}.vinBox b{display:block;font-size:16px;margin-top:4px;letter-spacing:.02em}.mediaPill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 8px;background:white;border:1px solid rgba(0,0,0,.06);font-size:11px;font-weight:820;color:#4b4b50;margin-top:10px;margin-right:5px}
+
+
+.roadSvg{position:absolute;inset:0;width:100%;height:100%;opacity:.96}.land{fill:#f0f2f5}.park{fill:#dcefdc}.water{fill:#d7ecff}.roadShadow{fill:none;stroke:rgba(255,255,255,.95);stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.roadMain{fill:none;stroke:#c8cbd1;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}.roadSecondary{fill:none;stroke:#d8dbe1;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}.roadDash{fill:none;stroke:rgba(255,255,255,.95);stroke-width:2;stroke-dasharray:10 10;stroke-linecap:round}.mapLabel{position:absolute;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(0,0,0,.06);padding:5px 8px;font-size:11px;font-weight:820;color:#4b4b50;box-shadow:0 6px 14px rgba(0,0,0,.06)}.mapLegend{position:absolute;right:14px;bottom:14px;border-radius:16px;background:rgba(255,255,255,.84);border:1px solid rgba(0,0,0,.06);padding:10px;font-size:11px;color:#4b4b50;box-shadow:0 8px 18px rgba(0,0,0,.08)}.mapLegend div{display:flex;align-items:center;gap:6px;margin:4px 0}.legendDot{width:10px;height:10px;border-radius:50%;background:#0071e3}.unitGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.unitCard{border-radius:19px;padding:15px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.04);cursor:pointer;transition:transform .15s ease,background .15s ease}.unitCard:hover{transform:translateY(-1px);background:rgba(0,113,227,.08)}.unitTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.unitCard h4{margin:0;font-size:15px}.unitCard p{margin:0;color:var(--muted);font-size:12px;line-height:1.34}.unitKpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.unitMini{border-radius:14px;padding:9px;background:white;border:1px solid rgba(0,0,0,.05)}.unitMini span{display:block;font-size:10px;color:var(--muted);font-weight:820;text-transform:uppercase;letter-spacing:.04em}.unitMini b{display:block;margin-top:4px;font-size:15px}.salesBoard{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.salesTile{border-radius:18px;padding:14px;background:rgba(118,118,128,.08);border:1px solid rgba(0,0,0,.04)}.salesTile h4{margin:0 0 6px;font-size:15px}.salesTile p{margin:0;color:var(--muted);font-size:12px;line-height:1.35}
+
+@media(max-width:1160px){.hero,.body,.workspace,.better{grid-template-columns:1fr}.better{grid-template-columns:repeat(2,1fr)}.side{border-right:0;border-bottom:1px solid var(--line)}.chat{position:static}.top{border-radius:24px;flex-wrap:wrap}.switch{order:3;width:100%}.roleBtn{flex:1}.brand{min-width:auto}}
+@media(max-width:720px){.unitGrid,.salesBoard{grid-template-columns:1fr}.knowledgeGrid{grid-template-columns:1fr}.scenarioSummary{grid-template-columns:1fr}.reportGrid{grid-template-columns:1fr}.wrap{width:calc(100vw - 18px);padding-top:9px}.heroCopy{padding:30px 24px}.hero p{font-size:17px}.previewGrid,.kpis,.mainGrid,.better,.detailGrid{grid-template-columns:1fr}.dashHead{flex-direction:column}.workspace{padding:14px}.dash h2{font-size:31px}.phone{max-width:100%}.row{grid-template-columns:1fr}.item{grid-template-columns:42px 1fr}.item .cta,.item .tag{grid-column:2}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="top">
+    <div class="brand"><div class="mark"></div><div><b>FleetHub Intelligence</b><span>Siemens Demo · OEM-Flottenplattform</span></div></div>
+    <div class="switch">
+      <button class="roleBtn active" data-role="fleet">Flottenmanager</button>
+      <button class="roleBtn" data-role="user">User Chooser</button>
+      <button class="roleBtn" data-role="sales">Vertrieb / KAM</button>
+    </div>
+    <div class="live"><span class="pulse"></span><span id="clock">Live-Daten aktiv</span></div>
+  </nav>
+
+  <section class="hero">
+    <div class="heroCopy glass">
+      <div class="eyebrow">Optimierte Flottenmanagementplattform</div>
+      <h1>Interaktiv. Rollenbasiert. In Echtzeit.</h1>
+      <p>Der Prototyp macht sichtbar, was die optimierte Plattform eines etablierten OEM besser kann: Live-Fahrzeugdaten, KI-Hinweise, klickbare Module, rollenbezogene Chatbots, Governance im Hintergrund sowie konkrete OEM-Angebote aus Fahrzeug-, Service- und Ladeökosystem.</p>
+      <div class="chips">
+        <span class="chip"><span class="dot"></span>Klickbare Live-Flotte</span>
+        <span class="chip"><span class="dot" style="background:#30d158"></span>KI-Chatbot je Rolle</span>
+        <span class="chip"><span class="dot" style="background:#bf5af2"></span>Privacy by Design</span>
+        <span class="chip"><span class="dot" style="background:#ff9f0a"></span>Module mit Detailansichten</span>
+      </div>
+    </div>
+    <div class="preview glass">
+      <div class="chrome"><i class="traffic"></i><i class="traffic"></i><i class="traffic"></i><div class="addr">fleethub.ai/demo/siemens-live</div></div>
+      <div class="previewGrid">
+        <div class="mini"><div class="label">Live Fahrzeuge</div><div class="val"><span id="heroVehicles">642</span> <small>Siemens</small></div><div class="flow"><i style="height:42%"></i><i style="height:55%"></i><i style="height:62%"></i><i style="height:72%"></i><i style="height:88%"></i></div></div>
+        <div class="mini"><div class="label">KI-Hinweise heute</div><div class="val">31 <small>priorisiert</small></div><div class="flow"><i style="height:35%"></i><i style="height:45%"></i><i style="height:58%"></i><i style="height:76%"></i><i style="height:92%"></i></div></div>
+        <div class="mini wide">
+          <div class="label">Rollen- und Datenschutzlogik</div>
+          <div class="list">
+            <div class="item"><div class="itemIcon">AI</div><div><h4>Chatbot sieht nur Rollendaten</h4><p>Flottenmanager: Gesamtflotte. User Chooser: eigenes Fahrzeug. KAM: Kundenvorgänge.</p></div><span class="tag green">aktiv</span></div>
+            <div class="item"><div class="itemIcon">🔒</div><div><h4>Private Fahrten maskiert</h4><p>Standort und Fahrverhalten privater Fahrten werden nicht an FM oder Vertrieb ausgespielt.</p></div><span class="tag">Privacy</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="better">
+    <article class="betterCard"><div class="ico">1</div><h3>Live-Detailzugriff</h3><p>Fahrzeuge und zulässige Fahrzeugdaten können angeklickt und geprüft werden.</p></article>
+    <article class="betterCard"><div class="ico">2</div><h3>KI pro Rolle</h3><p>Der Assistent antwortet abhängig von Flottenmanager, User Chooser oder KAM.</p></article>
+    <article class="betterCard"><div class="ico">3</div><h3>Governance im Hintergrund</h3><p>Data Quality Gates und Rollenrechte sichern die Plattform, ohne die Oberfläche zu überladen.</p></article>
+    <article class="betterCard"><div class="ico">4</div><h3>Modulare Plattform</h3><p>Jede Rolle kann zwischen Live-Daten, KI, Dokumenten, Service und Betreuung wechseln.</p></article>
+    <article class="betterCard"><div class="ico">5</div><h3>OEM-Ökosystem</h3><p>Die Plattform verbindet Fahrzeugportfolio, Servicepartner, Ladeangebote und Kundenbetreuung.</p></article>
+  </section>
+
+  <section class="dash" id="dashboard">
+    <div class="dashHead">
+      <div><h2 id="title">Flottenmanager Dashboard</h2><p id="subtitle">Steuerungszentrale für Siemens: Live-Flotte, Kosten, CO₂, Service, Dokumente und KI-gestützte Entscheidungsvorbereitung.</p></div>
+      <div class="badge" id="badge">Rolle: Flottenmanager</div>
+    </div>
+    <div class="body">
+      <aside class="side">
+        <p class="sideLabel" id="moduleLabel">Module</p>
+        <div id="moduleList"></div>
+        <div class="scope" id="scopeBox"></div>
+      </aside>
+      <div class="workspace">
+        <div class="mainGrid" id="content"></div>
+        <aside class="chat card">
+          <div class="chatBox">
+            <div class="chatHead"><div><h3 id="chatTitle">FleetHub AI</h3><p class="sub" id="chatSub">Antwortet mit Flottenmanager-Datensicht.</p></div><span class="tag">AI</span></div>
+            <div class="quick" id="quickPrompts"></div>
+            <div class="chatMsgs" id="chatMsgs"></div>
+            <div class="chatInput"><input id="chatInput" placeholder="Frage an FleetHub AI stellen..."><button id="sendBtn">Senden</button></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+  <p class="note">Konzeptprototyp für die Abschlusspräsentation · Siemens als Demo-Kunde · keine echten Kundendaten · alle Kennzahlen sind Demonstrationswerte.</p>
+</main>
+
+<div class="modal" id="modal">
+  <div class="modalCard">
+    <div class="modalTop"><div><h2 id="modalTitle" style="margin:0 0 5px;letter-spacing:-.04em"></h2><p class="sub" id="modalSub"></p></div><button class="close" id="closeModal">×</button></div>
+    <div class="detailGrid" id="modalDetails"></div>
+    <div class="explain" id="modalExplain"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const vehicleData = [
+  {id:"M-SI 2048E", driver:"Anna Weber", model:"VW ID.7 Pro", mode:"business", location:"München, Siemens Campus", speed:42, behavior:"ruhig", battery:"78%", service:"8 Tage", co2:"0 g/km"},
+  {id:"DO-SI 3312", driver:"Mehmet Kaya", model:"Audi A6 Avant", mode:"business", location:"Dortmund, B1", speed:66, behavior:"normal", battery:"-", service:"14 Tage", co2:"142 g/km"},
+  {id:"B-SI 8801E", driver:"Lena Hartmann", model:"BMW i4", mode:"business", location:"Berlin, Siemensstadt", speed:0, behavior:"geparkt", battery:"61%", service:"31 Tage", co2:"0 g/km"},
+  {id:"HH-SI 7120", driver:"Privatfahrt aktiv", model:"Mercedes C-Klasse", mode:"private", location:"ausgeblendet", speed:null, behavior:"ausgeblendet", battery:"-", service:"22 Tage", co2:"129 g/km"}
+];
+
+const roles = {
+  fleet: {
+    title:"Flottenmanager Dashboard",
+    subtitle:"Steuerungszentrale für Siemens: Live-Flotte, Kosten, CO₂, Service, Dokumente und KI-gestützte Entscheidungsvorbereitung.",
+    badge:"Rolle: Flottenmanager",
+    moduleLabel:"Flottenmodule",
+    scope:`<h4>Datensicht</h4>
+      <div class="scopeLine"><span class="check">✓</span>Gesamtflotte, Verträge, Kosten, ESG und aggregierte Nutzung</div>
+      <div class="scopeLine"><span class="check">✓</span>Live-Daten nur bei dienstlichen Fahrten; private Fahrten werden maskiert</div>
+      <div class="scopeLine"><span class="check">×</span>Keine privaten Fahrtrouten einzelner User Chooser</div>`,
+    chatSub:"Antwortet mit Flottenmanager-Datensicht.",
+    modules:[
+      ["live","Live-Flotte"],["ai","KI-Empfehlungen"],["model","Modell- & Produktberater"],["co2","CO₂ / TCO"],["docs","Dokumentenraum"]
+    ],
+    prompts:["Welche Fahrzeuge brauchen Service?","Wie entwickeln sich die Kosten?","Welche Modelle senken CO₂?","Erstelle einen CSRD-Bericht","Zeig mir private Fahrten von Anna Weber"]
+  },
+  user: {
+    title:"User Chooser Dashboard",
+    subtitle:"Reduzierte Self-Service-Sicht: eigenes Fahrzeug, Serviceempfehlungen, Dokumente, Privatsphäre und einfache Rückmeldung.",
+    badge:"Rolle: User Chooser",
+    moduleLabel:"Meine Module",
+    scope:`<h4>Datensicht</h4>
+      <div class="scopeLine"><span class="check">✓</span>Nur eigenes Fahrzeug, eigene Termine und eigene Dokumente</div>
+      <div class="scopeLine"><span class="check">✓</span>Privatfahrten bleiben geschützt</div>
+      <div class="scopeLine"><span class="check">×</span>Keine Gesamtflotte, Kosten- oder Kundensicht</div>`,
+    chatSub:"Antwortet nur mit Daten zum eigenen Fahrzeug.",
+    modules:[
+      ["mycar","Mein Fahrzeug"],["service","Service buchen"],["mydocs","Meine Dokumente"],["privacy","Privatsphäre"]
+    ],
+    prompts:["Wann muss mein Auto zum Service?","Erkläre meinen Spurhalteassistenten","Welche Daten sieht mein Flottenmanager?","Wo finde ich Videos zu meinem Fahrzeug?"]
+  },
+  sales: {
+    title:"Vertrieb / KAM Dashboard",
+    subtitle:"Digitaler Verkäuferkoffer für Siemens: Kundenstatus, Vertragsinformationen, offene Vorgänge, QBR-Vorbereitung und Dokumente.",
+    badge:"Rolle: Vertrieb / KAM",
+    moduleLabel:"KAM Module",
+    scope:`<h4>Datensicht</h4>
+      <div class="scopeLine"><span class="check">✓</span>Kunden-, Vertrags-, Bestell- und Betreuungsdaten</div>
+      <div class="scopeLine"><span class="check">✓</span>Gemeinsam geteilte Dokumente mit Siemens-Flottenmanager</div>
+      <div class="scopeLine"><span class="check">×</span>Keine privaten Fahr- oder Standortdaten einzelner Fahrer</div>`,
+    chatSub:"Antwortet mit KAM-/Kundenbetreuungsdatensicht.",
+    modules:[
+      ["customer","Siemens 360"],["units","Siemens Einheiten"],["care","KI-Betreuungshinweise"],["orders","Verträge & Bestellungen"],["salesdocs","Dokumentenraum"]
+    ],
+    prompts:["Welche Siemens Einheiten sind kritisch?","Bereite den QBR vor","Welche Unterlagen fehlen?","Darf ich Fahrerstandorte sehen?"]
+  }
+};
+
+let state = { role:"fleet", module:"live" };
+
+function setRole(role){
+  state.role = role;
+  state.module = roles[role].modules[0][0];
+  document.querySelectorAll(".roleBtn").forEach(b=>b.classList.toggle("active", b.dataset.role===role));
+  document.getElementById("title").textContent = roles[role].title;
+  document.getElementById("subtitle").textContent = roles[role].subtitle;
+  document.getElementById("badge").textContent = roles[role].badge;
+  document.getElementById("moduleLabel").textContent = roles[role].moduleLabel;
+  document.getElementById("scopeBox").innerHTML = roles[role].scope;
+  document.getElementById("chatSub").textContent = roles[role].chatSub;
+  renderModules();
+  renderContent();
+  resetChat();
+  document.getElementById("dashboard").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderModules(){
+  const box = document.getElementById("moduleList");
+  box.innerHTML = "";
+  roles[state.role].modules.forEach(([key,label])=>{
+    const btn = document.createElement("button");
+    btn.className = "module" + (state.module===key ? " active" : "");
+    btn.innerHTML = `<span class="sdot"></span>${label}`;
+    btn.onclick = ()=>{ state.module = key; renderModules(); renderContent(); };
+    box.appendChild(btn);
+  });
+}
+
+function tag(type,text){ return `<span class="tag ${type||""}">${text}</span>`; }
+
+function fleetLive(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Siemens Live-Flotte</h3><p class="sub">Klickbare Echtzeitansicht. Live-Daten sind nur bei dienstlichen Fahrten sichtbar; private Fahrten werden maskiert.</p></div>${tag("green",'aktualisiert vor <span class="secs">9</span>s')}</div>
+    <div class="kpis"><div class="kpi"><div class="label">Fahrzeuge</div><b>642</b><small>28 im Zulauf</small></div><div class="kpi"><div class="label">Live verbunden</div><b>91%</b><small>Data Gate passed</small></div><div class="kpi"><div class="label">Service-Risiko</div><b>37</b><small>priorisiert</small></div><div class="kpi"><div class="label">Privatfahrten</div><b>maskiert</b><small>nicht trackbar</small></div></div>
+  </section>
+
+  <section class="card"><div class="head"><div><h3>Importierte Kartenansicht</h3><p class="sub">Demo-Karte mit Straßennetz: schnellere Fahrzeuge bewegen sich schneller, parkende Fahrzeuge bleiben stehen.</p></div>${tag("green","Live")}</div>
+    <div class="map">
+      <svg class="roadSvg" viewBox="0 0 600 360" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="land" x="0" y="0" width="600" height="360"/>
+        <path class="park" d="M35,35 C110,5 170,45 205,110 C235,165 175,218 105,205 C48,195 12,105 35,35Z"/>
+        <path class="water" d="M440,20 C540,25 590,75 570,130 C548,190 460,170 420,118 C390,80 390,30 440,20Z"/>
+        <path class="roadShadow" d="M25,285 C120,250 185,235 250,190 C325,138 405,120 575,95"/>
+        <path class="roadMain" d="M25,285 C120,250 185,235 250,190 C325,138 405,120 575,95"/>
+        <path class="roadDash" d="M25,285 C120,250 185,235 250,190 C325,138 405,120 575,95"/>
+        <path class="roadShadow" d="M70,80 C145,118 215,142 290,175 C380,215 455,258 555,315"/>
+        <path class="roadMain" d="M70,80 C145,118 215,142 290,175 C380,215 455,258 555,315"/>
+        <path class="roadDash" d="M70,80 C145,118 215,142 290,175 C380,215 455,258 555,315"/>
+        <path class="roadSecondary" d="M135,320 C160,250 205,210 250,190"/>
+        <path class="roadSecondary" d="M290,175 C330,100 340,65 372,28"/>
+        <path class="roadSecondary" d="M405,120 C445,168 470,210 508,262"/>
+        <path class="roadSecondary" d="M82,170 C150,160 212,168 290,175"/>
+      </svg>
+      <span class="mapLabel" style="left:20px;top:16px">Siemens Standort</span>
+      <span class="mapLabel" style="left:47%;top:46%">Innenstadt</span>
+      <span class="mapLabel" style="right:18px;top:17px">Autobahnzubringer</span>
+      <span class="pin green liveMove" id="pin0" data-vehicle="0" style="left:18%;top:39%"></span>
+      <span class="pin liveMove" id="pin1" data-vehicle="1" style="left:48%;top:48%"></span>
+      <span class="pin orange liveMove" id="pin2" data-vehicle="2" style="left:72%;top:38%"></span>
+      <span class="pin privacy" data-vehicle="3" style="left:61%;top:68%"></span>
+      <div class="mapLegend"><div><span class="legendDot" style="background:#30d158"></span>dienstlich schnell</div><div><span class="legendDot"></span>dienstlich normal</div><div><span class="legendDot" style="background:#ff9f0a"></span>geparkt/langsam</div><div><span class="legendDot" style="background:#86868b"></span>privat maskiert</div></div>
+    </div>
+  </section>
+
+  <section class="card"><div class="head"><div><h3>Dynamische Telematik</h3><p class="sub">Geschwindigkeit, Status und Position ändern sich live entlang der Straßen. Private Fahrt bleibt ausgeblendet.</p></div>${tag("","Real-Time Data")}</div>
+    <div class="speedGrid">
+      <div class="speedLine"><div><h4>M-SI 2048E · VW ID.7 Pro</h4><p>München · dienstlich · Fahrverhalten: ruhig</p></div><div class="speedVal" id="speed0">42 km/h</div><div class="speedTrack"><span id="bar0" style="width:42%"></span></div></div>
+      <div class="speedLine"><div><h4>DO-SI 3312 · Audi A6 Avant</h4><p>Dortmund · dienstlich · Fahrverhalten: normal</p></div><div class="speedVal" id="speed1">66 km/h</div><div class="speedTrack"><span id="bar1" style="width:66%"></span></div></div>
+      <div class="speedLine"><div><h4>B-SI 8801E · BMW i4</h4><p>Berlin · geparkt/langsam · Ladezustand wird aktualisiert</p></div><div class="speedVal" id="speed2">0 km/h</div><div class="speedTrack"><span id="bar2" style="width:5%"></span></div></div>
+      <div class="speedLine"><div><h4>HH-SI 7120 · Privatfahrt aktiv</h4><p>Für Flottenmanager nicht trackbar</p></div><div class="speedVal">maskiert</div><div class="speedTrack"><span style="width:0%;background:#86868b"></span></div></div>
+    </div>
+  </section>
+
+  <section class="card full"><div class="head"><div><h3>Fahrzeugdetails</h3><p class="sub">Auswahl über Karte oder Tabelle.</p></div>${tag("","klickbar")}</div>
+    <div class="table">${vehicleData.map((v,i)=>`
+      <div class="row" data-vehicle="${i}"><div><h4>${v.id}</h4><p>${v.model}</p></div><div><span class="muted">Fahrer</span><br><span class="metric">${v.driver}</span></div><div><span class="muted">Status</span><br><span class="metric" id="tableSpeed${i}">${v.mode==="private"?"Privatfahrt maskiert":v.speed+" km/h"}</span></div>${v.mode==="private"?tag("gray","maskiert"):tag("green","dienstlich")}</div>`).join("")}</div>
+  </section>`;
+}
+function fleetAI(){
+  return `
+  <section class="card full"><div class="head"><div><h3>KI-Entscheidungsvorbereitung</h3><p class="sub">Die KI erkennt Handlungsbedarf, erklärt die Grundlage und zeigt, welche Daten genutzt werden dürfen.</p></div>${tag("","AI")}</div>
+    <div class="list">
+      <div class="item"><div class="itemIcon">!</div><div><h4>Servicecluster München</h4><p>37 Fahrzeuge benötigen Service; Bündelung bei Siemens Mobility Servicepartner empfohlen.</p></div><button class="cta" onclick="openTextModal('Servicecluster München','37 Fahrzeuge · Priorität hoch','Empfehlung: Termine nach Standort und Dringlichkeit bündeln. Grundlage sind dienstliche Fahrzeug- und Servicedaten. Der Flottenmanager prüft die Maßnahme, bevor Termine verbindlich ausgelöst werden.')">Prüfen</button></div>
+      <div class="item"><div class="itemIcon">CO₂</div><div><h4>CO₂-Reduktionsszenario</h4><p>42 Verbrenner können durch OEM-E-Modelle ersetzt werden; erwartete CO₂-Reduktion im Szenario: 18%.</p></div><button class="cta green" onclick="openTextModal('CO₂-Reduktionsszenario','42 Fahrzeuge geeignet','Die KI empfiehlt zuerst OEM-eigene E-Modelle aus dem verfügbaren Portfolio. Grundlage sind Reichweitenbedarf, dienstliche Fahrprofile, Ladezugang, TCO und CO₂-Zielpfad. Private Fahrten werden nicht offengelegt.')">Szenario</button></div>
+      <div class="item"><div class="itemIcon">€</div><div><h4>Kostenentwicklung Q3</h4><p>TCO steigt voraussichtlich um 4,2%; Haupttreiber sind Ladepreise, Servicefälle und Standzeiten.</p></div><button class="cta secondary" onclick="openTextModal('Kostenentwicklung Q3','TCO-Prognose +4,2%','Die KI zerlegt die Kostenentwicklung nach Energie/Laden, Service, Leasing/Vertrag und Standzeiten. Empfehlung: Ladetarife und Servicecluster zuerst prüfen.')">Details</button></div>
+      <div class="item"><div class="itemIcon">🔒</div><div><h4>Governance-Hinweis</h4><p>Anfrage nach privaten Fahrten wird blockiert. Sichtbar sind nur dienstliche Live-Daten und aggregierte Informationen.</p></div>${tag("green","Privacy by Design")}</div>
+    </div>
+  </section>`;
+}
+
+
+function fleetModelAdvisor(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Herstellerübergreifender Modell- & Produktberater</h3><p class="sub">Die Plattform gehört zu einem etablierten OEM, empfiehlt aber auch herstellerfremde Modelle und Produkte, wenn sie besser zum Flottenbedarf passen.</p></div>${tag("","Multi-OEM + AI")}</div>
+    <div class="kpis"><div class="kpi"><div class="label">geeignete Ersatzkandidaten</div><b>42</b><small>nach Nutzungsprofil</small></div><div class="kpi"><div class="label">CO₂-Szenario</div><b>-18%</b><small>modelliert</small></div><div class="kpi"><div class="label">TCO-Potenzial</div><b>312k€</b><small>über Laufzeit</small></div><div class="kpi"><div class="label">Ladebedarf</div><b>9</b><small>zusätzliche Ladepunkte</small></div></div>
+  </section>
+  <section class="card"><div class="head"><div><h3>Empfohlene Modelle</h3><p class="sub">Vergleich aus eigenem OEM-Portfolio und relevanten Fremdmarken.</p></div>${tag("green","priorisiert")}</div>
+    <div class="list">
+      <div class="item"><div class="itemIcon">E1</div><div><h4>Eigenes OEM E-Modell</h4><p>Gute Passung für Langstreckenprofile, Serviceintegration und Ladepaket des Plattformanbieters.</p></div>${tag("green","18 Fahrzeuge")}</div>
+      <div class="item"><div class="itemIcon">F1</div><div><h4>Fremd-OEM E-Modell</h4><p>Bessere Reichweite für bestimmte Außendienstprofile; Datenverfügbarkeit muss regelmäßig geprüft werden.</p></div>${tag("orange","12 Fahrzeuge")}</div>
+      <div class="item"><div class="itemIcon">V</div><div><h4>E-Transporter eines Partner-OEM</h4><p>Für Service- und Standortfahrten mit festen Touren und Depotladung geeignet.</p></div>${tag("","12 Fahrzeuge")}</div>
+    </div>
+  </section>
+  <section class="card"><div class="head"><div><h3>Produkt- und Serviceempfehlungen</h3><p class="sub">Die Plattform empfiehlt nicht nur Fahrzeuge, sondern auch passende Lade-, Service- und Dokumentenbausteine.</p></div>${tag("","Ökosystem")}</div>
+    <div class="list">
+      <div class="item"><div class="itemIcon">⚡</div><div><h4>Ladeinfrastruktur ergänzen</h4><p>9 zusätzliche Ladepunkte an Siemens-Standorten reduzieren Ladeengpässe und Ad-hoc-Ladevorgänge.</p></div><button class="cta green" onclick="openTextModal('Ladeinfrastruktur ergänzen','9 Ladepunkte empfohlen','Die KI verknüpft Fahrzeugersatz mit Ladebedarf. Empfehlungen können aus dem eigenen OEM-Ökosystem oder von externen Partnern stammen.')">Anzeigen</button></div>
+      <div class="item"><div class="itemIcon">S</div><div><h4>Servicepaket prüfen</h4><p>Für die Ersatzkandidaten wird ein angepasstes Wartungs- und Servicepaket vorgeschlagen.</p></div><button class="cta secondary" onclick="openTextModal('Servicepaket prüfen','Wartung und Standzeiten','Empfehlung dient als Entscheidungsunterstützung. Der Flottenmanager entscheidet, ob das Paket in die nächste Planung aufgenommen wird.')">Prüfen</button></div>
+      
+    </div>
+  </section>`;
+}
+function fleetCO2(){
+  return `
+  <section class="card full"><div class="head"><div><h3>CO₂ / TCO Cockpit</h3><p class="sub">Automatisierte Reportvorbereitung aus Live-, Kosten-, Lade-, Service-, Vertrags- und ESG-Daten.</p></div>${tag("gray","CSRD-ready Demo")}</div>
+    <div class="kpis"><div class="kpi"><div class="label">CO₂ Zielpfad</div><b id="co2Kpi">-8%</b><small>ggü. Vorquartal</small></div><div class="kpi"><div class="label">TCO Forecast</div><b id="tcoKpi">4,82M€</b><small>Q3 Projektion</small></div><div class="kpi"><div class="label">E-Quote</div><b id="eShareKpi">34%</b><small>+5 PP</small></div><div class="kpi"><div class="label">Berichtsstatus</div><b id="reportKpi">92%</b><small>automatisch vorbereitet</small></div></div>
+  </section>
+
+  <section class="card"><div class="head"><div><h3>Szenario-Planer</h3><p class="sub">Interaktiv prüfen, wie Maßnahmen CO₂ und TCO beeinflussen.</p></div>${tag("","Simulation")}</div>
+    <div class="scenarioControls">
+      <div class="scenarioRow"><div><h4>42 Fahrzeuge durch passende E-Modelle ersetzen</h4><p>Die Empfehlung kann eigene OEM-Modelle und Fremd-OEM-Modelle enthalten.</p></div><button class="toggle" data-scenario="models" onclick="toggleScenario(this)"></button></div>
+      <div class="scenarioRow"><div><h4>9 Ladepunkte an Siemens-Standorten ergänzen</h4><p>Reduziert Ladeengpässe und teure Ad-hoc-Ladevorgänge.</p></div><button class="toggle" data-scenario="charging" onclick="toggleScenario(this)"></button></div>
+      <div class="scenarioRow"><div><h4>Servicefälle standortweise bündeln</h4><p>Reduziert Standzeiten und operative Kosten.</p></div><button class="toggle" data-scenario="service" onclick="toggleScenario(this)"></button></div>
+      <div class="progress"><span id="scenarioProgress"></span></div>
+      <div class="quiet gray" id="scenarioText">Aktiviere Maßnahmen, um ein KI-Szenario für CO₂, TCO und Berichtsstatus zu simulieren.</div>
+    </div>
+  </section>
+
+  <section class="card"><div class="head"><div><h3>KI-Reportvorschau</h3><p class="sub">Keine Download-Funktion: Die Plattform zeigt eine automatisch vorbereitete Berichtsvorschau zur Prüfung.</p></div>${tag("green","KI-generiert")}</div>
+    <div class="reportTabs">
+      <button class="reportTab active" onclick="setReportPreview('csrd',this)">CSRD/ESG</button>
+      <button class="reportTab" onclick="setReportPreview('tco',this)">TCO</button>
+      <button class="reportTab" onclick="setReportPreview('qbr',this)">QBR Summary</button>
+    </div>
+    <div class="reportPreview" id="reportPreview">
+      <h4>CSRD-/ESG-Flottenbericht</h4>
+      <p>Die KI bereitet eine Berichtsvorschau aus geprüften Flotten-, Lade-, Kosten- und CO₂-/ESG-Daten vor.</p>
+      <ul class="reportBullets">
+        <li>CO₂-Entwicklung der Siemens-Flotte im Zeitverlauf</li>
+        <li>E-Quote, Ersatzkandidaten und Ladebedarf</li>
+        <li>Hinweis: private Fahrten werden nicht in die Auswertung übernommen</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card full"><div class="head"><div><h3>Berichtsfähige Kennzahlen</h3><p class="sub">Die Oberfläche zeigt die relevanten Ergebnisgrößen, ohne die technische Berichtslogik als eigenes Modul auszustellen.</p></div>${tag("green","prüfbar")}</div>
+    <div class="scenarioSummary">
+      <div class="scenarioBox"><div class="label">CO₂-Entwicklung</div><b id="summaryCo2">-8%</b></div>
+      <div class="scenarioBox"><div class="label">TCO-Prognose</div><b id="summaryTco">4,82M€</b></div>
+      <div class="scenarioBox"><div class="label">KI-Bericht</div><b id="summaryReport">Review</b></div>
+    </div>
+  </section>`;
+}
+function fleetDocs(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Gemeinsamer Dokumentenraum</h3><p class="sub">Flottenmanager und KAM arbeiten an denselben freigegebenen Dokumenten.</p></div>${tag("","Cloud")}</div>
+    <div class="docs">
+      <div class="doc"><div class="docIcon">PDF</div><div><h4>Siemens_Q3_ESG_Report.pdf</h4><p>Geteilt mit KAM · Version 1.4 · Data Gate bestanden</p></div>${tag("green","aktuell")}</div>
+      <div class="doc"><div class="docIcon">XLS</div><div><h4>TCO_Szenario_E-Umstellung.xlsx</h4><p>KI-Szenario + manuelle Prüfung ausstehend</p></div>${tag("orange","Review")}</div>
+      <div class="doc"><div class="docIcon">DOC</div><div><h4>Servicevereinbarung_2027.docx</h4><p>Vom KAM bereitgestellt · Änderungsvorschlag offen</p></div>${tag("gray","geteilt")}</div>
+      <div class="doc"><div class="docIcon">AI</div><div><h4>Automatische Dokumentenklassifikation</h4><p>Rechnungen, Serviceberichte und Zulassungsunterlagen werden automatisch zugeordnet.</p></div>${tag("","AI Doc")}</div>
+    </div>
+  </section>`;
+}
+
+function userMycar(){
+  const v=vehicleData[0];
+  return `
+  <section class="card"><div class="head"><div><h3>Mein Fahrzeug</h3><p class="sub">Bewusst einfache Sicht: keine komplexe Fuhrparksoftware.</p></div>${tag("green","Self-Service")}</div>
+    <div class="phone"><div class="screen"><div class="phoneTop"><span>9:41</span><span>FleetHub</span></div><div class="vehicle"><h3>${v.model}</h3><p>${v.id} · Siemens</p><div class="vm"><div><b>${v.battery}</b><span>Ladestand</span></div><div><b>412 km</b><span>Reichweite</span></div><div><b>${v.service}</b><span>bis Service</span></div><div><b>privat</b><span>Modus verfügbar</span></div></div></div><div class="action"><h4>Service empfohlen</h4><p>Die KI erkennt einen anstehenden Service und schlägt passende Werkstätten vor.</p><button class="cta" onclick="openTextModal('Service empfohlen','Eigenes Fahrzeug','Empfohlen: Termin innerhalb der nächsten 8 Tage buchen. Diese Empfehlung betrifft nur dein eigenes Fahrzeug.')">Termin wählen</button> <button class="cta secondary">Später</button></div><div class="privacyBox">Privatfahrten geschützt: Flottenmanagement und Vertrieb sehen keine private Route.</div></div></div>
+  </section>
+  <section class="card"><div class="head"><div><h3>Meine Live-Daten</h3><p class="sub">Nur eigene Fahrzeugdaten.</p></div>${tag("green","Live")}</div>
+    <div class="kpis" style="grid-template-columns:repeat(2,1fr)"><div class="kpi"><div class="label">Geschwindigkeit</div><b id="ownSpeed">42 km/h</b><small>dienstliche Fahrt</small></div><div class="kpi"><div class="label">Fahrverhalten</div><b>ruhig</b><small>Eco Score gut</small></div><div class="kpi"><div class="label">Standort</div><b style="font-size:20px">München</b><small>nur eigene Sicht</small></div><div class="kpi"><div class="label">Service</div><b>8 Tage</b><small>KI-Hinweis aktiv</small></div></div>
+  </section>`;
+}
+
+function userService(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Service buchen</h3><p class="sub">Proaktive Handlungsempfehlung statt manueller Suche.</p></div>${tag("","AI")}</div>
+    <div class="list"><div class="item"><div class="itemIcon">1</div><div><h4>Siemens Mobility Servicepartner</h4><p>2,1 km entfernt · 3 freie Slots diese Woche · passend zum Fahrzeugmodell.</p></div><button class="cta green" onclick="openTextModal('Termin bestätigt','Siemens Mobility Servicepartner','Der Termin wurde als Demo ausgewählt. In der echten Plattform würde der Termin an Werkstatt und Flottenmanager-Workflow übergeben.')">Übernehmen</button></div><div class="item"><div class="itemIcon">2</div><div><h4>Autohaus Nord</h4><p>5,8 km entfernt · nächster Slot Montag 09:30 Uhr.</p></div><button class="cta secondary">Alternative</button></div><div class="item"><div class="itemIcon">↩</div><div><h4>Rückmeldung geben</h4><p>Hinweis passt nicht? Nutzer kann falsche Daten melden oder Termin ablehnen.</p></div>${tag("gray","Kontrolle")}</div></div>
+  </section>`;
+}
+function userDocs(){
+  return `<section class="card full"><div class="head"><div><h3>Meine Dokumente</h3><p class="sub">Nur fahrzeug- und nutzerbezogene Dateien sowie eine FIN-basierte Wissensbibliothek.</p></div>${tag("","Cloud")}</div>
+    <div class="docs">
+      <div class="doc"><div class="docIcon">PDF</div><div><h4>Fahrzeughandbuch.pdf</h4><p>Passend zu M-SI 2048E · VW ID.7 Pro</p></div>${tag("","öffnen")}</div>
+      <div class="doc"><div class="docIcon">PDF</div><div><h4>Servicebestätigung.pdf</h4><p>Letzte Wartung · 12.04.</p></div>${tag("green","aktuell")}</div>
+      <div class="doc"><div class="docIcon">FORM</div><div><h4>Schadensmeldung</h4><p>Mit Foto-Upload und Status</p></div>${tag("orange","bereit")}</div>
+    </div>
+  </section>
+  <section class="card full"><div class="head"><div><h3>Wissensbibliothek</h3><p class="sub">Die Inhalte werden anhand der Fahrzeugidentifikationsnummer auf das konkrete Fahrzeug zugeschnitten.</p></div>${tag("green","FIN-basiert")}</div>
+    <div class="vinBox"><span class="label">Fahrzeugidentifikationsnummer</span><b>WVWZZZE1ZRP2048E</b><p class="sub" style="margin-top:6px">Die Plattform zeigt nur Funktionen, Assistenzsysteme und Dokumente, die für dieses individuelle Fahrzeug relevant sind.</p></div>
+    <div class="knowledgeGrid">
+      <div class="knowledgeCard" onclick="openTextModal('Video: Adaptive Cruise Control','2:14 Minuten · passend zu deinem Fahrzeug','Demonstrative Erklärung: Aktivierung, Abstandseinstellung, Grenzen des Systems und Hinweis, dass der Fahrer verantwortlich bleibt.')"><div class="knowledgeIcon">▶</div><h4>Adaptive Cruise Control</h4><p>Video-Erklärung zu Abstand, Tempo und Systemgrenzen.</p><span class="mediaPill">Video</span><span class="mediaPill">Assistenzsystem</span></div>
+      <div class="knowledgeCard" onclick="openTextModal('Dokument: Spurhalteassistent','PDF · 4 Seiten','Erklärt Aktivierung, Warnlogik, Grenzen bei Baustellenmarkierungen und empfohlene Nutzung im Alltag.')"><div class="knowledgeIcon">PDF</div><h4>Spurhalteassistent</h4><p>Kurzdokument mit Funktionen, Warnungen und Grenzen.</p><span class="mediaPill">PDF</span><span class="mediaPill">Sicherheit</span></div>
+      <div class="knowledgeCard" onclick="openTextModal('Tutorial: Ladeplanung','3:05 Minuten · E-Fahrzeug','Die Bibliothek erklärt Ladeplanung, Routenoptionen, Ladestand, Reichweite und empfohlene Ladefenster für dein Fahrzeug.')"><div class="knowledgeIcon">⚡</div><h4>Ladeplanung & Reichweite</h4><p>Video-Tutorial zu Ladefenstern und Reichweitenlogik.</p><span class="mediaPill">Video</span><span class="mediaPill">E-Mobilität</span></div>
+      <div class="knowledgeCard" onclick="openTextModal('Interaktive Hilfe: Privatmodus','Kurzanleitung','Zeigt, wie der Privatmodus funktioniert und welche Daten für Flottenmanagement und Vertrieb nicht sichtbar sind.')"><div class="knowledgeIcon">🔒</div><h4>Privatmodus verstehen</h4><p>Erklärung, welche Daten geschützt bleiben.</p><span class="mediaPill">Hilfe</span><span class="mediaPill">Privacy</span></div>
+    </div>
+  </section>`;
+}
+function userPrivacy(){
+  return `<section class="card full"><div class="head"><div><h3>Privatsphäre</h3><p class="sub">Die Plattform zeigt transparent, welche Daten sichtbar sind.</p></div>${tag("green","Privacy")}</div><div class="list"><div class="item"><div class="itemIcon">✓</div><div><h4>Für dich sichtbar</h4><p>Eigene Fahrzeugdaten, eigene Servicehinweise, eigene Dokumente.</p></div>${tag("green","erlaubt")}</div><div class="item"><div class="itemIcon">×</div><div><h4>Nicht für KAM sichtbar</h4><p>Private Fahrten, Fahrverhalten und Standortdaten einzelner Fahrer.</p></div>${tag("gray","gesperrt")}</div><div class="item"><div class="itemIcon">×</div><div><h4>Nicht für Flottenmanager sichtbar</h4><p>Private Routen werden maskiert. Nur notwendige aggregierte oder dienstliche Daten werden genutzt.</p></div>${tag("gray","maskiert")}</div></div></section>`;
+}
+
+function salesCustomer(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Siemens 360</h3><p class="sub">Account-Übersicht für den Vertrieb: Einheiten, offene Vorgänge, QBR-Status und gemeinsame Dokumente.</p></div>${tag("","KAM")}</div>
+    <div class="kpis"><div class="kpi"><div class="label">Siemens Einheiten</div><b>6</b><small>in der Demo-Flotte</small></div><div class="kpi"><div class="label">Fahrzeuge</div><b>642</b><small>gesamt</small></div><div class="kpi"><div class="label">Offene Vorgänge</div><b>18</b><small>priorisiert</small></div><div class="kpi"><div class="label">QBR Status</div><b>72%</b><small>vorbereitet</small></div></div>
+  </section>
+  <section class="card"><div class="head"><div><h3>Account Map</h3><p class="sub">Klickbare Siemens-Einheiten mit Betreuungsbedarf.</p></div>${tag("green","interaktiv")}</div><div class="customers">
+    <div class="cust" onclick="openTextModal('Siemens AG Corporate Fleet','642 Fahrzeuge · 18 offene Vorgänge','Zentrale Sicht für den Key Account Manager: QBR-Status, Verträge, Dokumente, offene Service- und Lieferstatuspunkte. Keine privaten Fahrerstandorte.')"><div class="avatar">SI</div><div><h4>Siemens AG Corporate Fleet</h4><p>Gesamtaccount · QBR in Vorbereitung</p></div>${tag("orange","prüfen")}</div>
+    <div class="cust" onclick="openTextModal('Siemens Mobility','188 Fahrzeuge · Servicecluster München','Betreuungsbedarf: Servicefälle bündeln, Lieferstatus prüfen, QBR-Folie aktualisieren.')"><div class="avatar">SM</div><div><h4>Siemens Mobility</h4><p>188 Fahrzeuge · Servicecluster München</p></div>${tag("","Termin")}</div>
+    <div class="cust" onclick="openTextModal('Siemens Healthineers','96 Fahrzeuge · Lieferstatus aktualisiert','Betreuungsbedarf: Lieferstatus und Dokumente für die nächste Abstimmung vorbereiten.')"><div class="avatar">SH</div><div><h4>Siemens Healthineers</h4><p>96 Fahrzeuge · Lieferstatus aktualisiert</p></div>${tag("green","stabil")}</div>
+  </div></section>
+  <section class="card"><div class="head"><div><h3>Betreuungsverlauf</h3><p class="sub">CRM-, Vertrags- und Dokumentenlogik in einer Oberfläche.</p></div>${tag("gray","Timeline")}</div><div class="timeline"><div class="tr"><div class="time">Heute</div><div><h4>QBR-Unterlage aktualisiert</h4><p>ESG-Report wurde vom Flottenmanager geteilt.</p></div></div><div class="tr"><div class="time">Gestern</div><div><h4>KI-Hinweis erstellt</h4><p>Servicefälle Standort München wurden gruppiert.</p></div></div><div class="tr"><div class="time">Mo</div><div><h4>Vertragsdaten aktualisiert</h4><p>Bonus- und Lieferstatusdaten wurden synchronisiert.</p></div></div></div></section>`;
+}
+
+function salesUnits(){
+  return `
+  <section class="card full"><div class="head"><div><h3>Siemens Einheiten und Tochtergesellschaften</h3><p class="sub">Ausdifferenzierte Account-Sicht für Vertrieb/KAM. Die Demo nutzt Siemens-Einheiten als kundennahe Struktur.</p></div>${tag("","Account Intelligence")}</div>
+    <div class="unitGrid">
+      <div class="unitCard" onclick="openTextModal('Siemens Mobility','188 Fahrzeuge · hoher Servicebedarf','Fokus: Servicecluster München, Lieferstatus für neue Fahrzeuge, QBR-Unterlage ergänzen. Sichtbar sind kunden- und vertragsbezogene Informationen, keine Fahrerstandorte.')"><div class="unitTop"><h4>Siemens Mobility</h4>${tag("orange","Service")}</div><p>Mobilitäts- und Transportumfeld mit hohem Anteil dienstlicher Standortfahrten.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>188</b></div><div class="unitMini"><span>Vorgänge</span><b>7</b></div><div class="unitMini"><span>QBR</span><b>65%</b></div></div></div>
+      <div class="unitCard" onclick="openTextModal('Siemens Healthineers','96 Fahrzeuge · Lieferstatus stabil','Fokus: Liefertermine, Dokumente und Serviceverfügbarkeit. Vertrieb sieht keine Live-Daten einzelner Fahrer.')"><div class="unitTop"><h4>Siemens Healthineers</h4>${tag("green","stabil")}</div><p>Healthcare-bezogene Einheit mit planbaren Dienstwagen- und Servicefahrzeugprofilen.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>96</b></div><div class="unitMini"><span>Vorgänge</span><b>2</b></div><div class="unitMini"><span>QBR</span><b>81%</b></div></div></div>
+      <div class="unitCard" onclick="openTextModal('Smart Infrastructure','142 Fahrzeuge · Ladebedarf','Fokus: Elektrifizierung, Ladepunkte und CO₂-/TCO-Szenario für Standortflotten.')"><div class="unitTop"><h4>Smart Infrastructure</h4>${tag("","CO₂")}</div><p>Standort- und Infrastrukturprofile mit relevantem Lade- und Elektrifizierungsbedarf.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>142</b></div><div class="unitMini"><span>Vorgänge</span><b>4</b></div><div class="unitMini"><span>E-Quote</span><b>41%</b></div></div></div>
+      <div class="unitCard" onclick="openTextModal('Digital Industries','124 Fahrzeuge · TCO prüfen','Fokus: TCO-Entwicklung, Bestellstatus und Ersatzkandidaten für E-Modelle.')"><div class="unitTop"><h4>Digital Industries</h4>${tag("orange","TCO")}</div><p>Industrienahe Nutzerprofile mit hoher Relevanz für Kosten- und Verfügbarkeitsdaten.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>124</b></div><div class="unitMini"><span>Vorgänge</span><b>3</b></div><div class="unitMini"><span>TCO</span><b>+3%</b></div></div></div>
+      <div class="unitCard" onclick="openTextModal('Siemens Financial Services','52 Fahrzeuge · Vertragsfokus','Fokus: Vertragslaufzeiten, Leasing-/Finanzierungslogik und Dokumente für Account Review.')"><div class="unitTop"><h4>Siemens Financial Services</h4>${tag("gray","Verträge")}</div><p>Stärker vertrags- und dokumentenorientierte Betreuungssicht.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>52</b></div><div class="unitMini"><span>Vorgänge</span><b>1</b></div><div class="unitMini"><span>Review</span><b>30T</b></div></div></div>
+      <div class="unitCard" onclick="openTextModal('Siemens Corporate Functions','40 Fahrzeuge · Dokumente offen','Fokus: fehlende Dokumente, Servicevereinbarung und interne Freigaben.')"><div class="unitTop"><h4>Corporate Functions</h4>${tag("","Docs")}</div><p>Zentrale Account-Betreuung mit Schwerpunkt Dokumente und Freigaben.</p><div class="unitKpis"><div class="unitMini"><span>Fahrzeuge</span><b>40</b></div><div class="unitMini"><span>Docs</span><b>5</b></div><div class="unitMini"><span>Status</span><b>Review</b></div></div></div>
+    </div>
+  </section>
+  <section class="card full"><div class="head"><div><h3>Interaktives Betreuungsboard</h3><p class="sub">Der Vertrieb sieht priorisierte Account-Aktionen statt einzelner Fahrer- oder Bewegungsdaten.</p></div>${tag("green","KAM-fähig")}</div>
+    <div class="salesBoard">
+      <div class="salesTile"><h4>Nächstes Kundengespräch</h4><p>Siemens Mobility QBR · Agenda automatisch aus ESG-, TCO- und Servicepunkten vorbereitet.</p></div>
+      <div class="salesTile"><h4>Offene Dokumente</h4><p>5 Dokumente im Review, darunter TCO-Anhang und Serviceübersicht München.</p></div>
+      <div class="salesTile"><h4>Handlungsbedarf</h4><p>Servicecluster, Lieferstatus und Ladeinfrastruktur für Smart Infrastructure priorisiert.</p></div>
+    </div>
+  </section>`;
+}
+
+function salesCare(){
+  return `<section class="card full"><div class="head"><div><h3>KI-Hinweise für Kundenbetreuung</h3><p class="sub">Kundenrelevante Vorgänge schneller einordnen, ohne private Fahrer- oder Standortdaten zu sehen.</p></div>${tag("","AI")}</div><div class="list"><div class="item"><div class="itemIcon">1</div><div><h4>QBR vorbereiten</h4><p>CO₂- und TCO-Unterlagen für Siemens AG sind unvollständig.</p></div><button class="cta">Öffnen</button></div><div class="item"><div class="itemIcon">2</div><div><h4>Offene Vorgänge bündeln</h4><p>Acht Servicefälle betreffen Standort München; Kundeninformation vorbereiten.</p></div><button class="cta secondary">Merken</button></div><div class="item"><div class="itemIcon">3</div><div><h4>Lieferstatus verändert</h4><p>28 Fahrzeuge mit neuer Auslieferungsprognose; Kommunikation vorbereiten.</p></div><button class="cta green">Planen</button></div><div class="item"><div class="itemIcon">🔒</div><div><h4>Keine Fahrerortung</h4><p>Der KAM erhält keine privaten Fahrerstandorte; nur kunden- und vorgangsbezogene Informationen.</p></div>${tag("green","Privacy")}</div></div></section>`;
+}
+function salesOrders(){
+  return `<section class="card full"><div class="head"><div><h3>Verträge & Bestellungen</h3><p class="sub">Der digitale Verkäuferkoffer bündelt liefer- und vertragsbezogene Informationen.</p></div>${tag("","live")}</div><div class="kpis"><div class="kpi"><div class="label">Bestellungen offen</div><b>28</b><small>neue Prognose</small></div><div class="kpi"><div class="label">Verträge aktiv</div><b>14</b><small>Siemens Einheiten</small></div><div class="kpi"><div class="label">QBR fällig</div><b>3</b><small>nächste 30 Tage</small></div><div class="kpi"><div class="label">Dokumente offen</div><b>5</b><small>Review nötig</small></div></div></section>`;
+}
+function salesDocs(){
+  return `<section class="card full"><div class="head"><div><h3>Gemeinsamer Dokumentenraum</h3><p class="sub">Ein Verkäuferkoffer für Kundengespräch, QBR und Nachbereitung.</p></div>${tag("","Cloud")}</div><div class="docs"><div class="doc"><div class="docIcon">PDF</div><div><h4>Siemens_QBR_Agenda.pdf</h4><p>Geteilt mit Flottenmanager · heute</p></div>${tag("green","geteilt")}</div><div class="doc"><div class="docIcon">XLS</div><div><h4>Bestellbestand_Q3.xlsx</h4><p>Aus Bestellsystem automatisch aktualisiert</p></div>${tag("","live")}</div><div class="doc"><div class="docIcon">PDF</div><div><h4>Servicefälle_München.pdf</h4><p>Aus Service-Connector generiert</p></div>${tag("orange","Review")}</div><div class="doc"><div class="docIcon">AI</div><div><h4>Dokument automatisch erkannt</h4><p>Rechnung und Zulassungsunterlagen wurden klassifiziert und dem Siemens-Ordner zugeordnet.</p></div>${tag("","AI Doc")}</div></div></section>`;
+}
+
+function renderContent(){
+  const c = document.getElementById("content");
+  if(state.role==="fleet"){
+    if(state.module==="live") c.innerHTML=fleetLive();
+    if(state.module==="ai") c.innerHTML=fleetAI();
+    if(state.module==="model") c.innerHTML=fleetModelAdvisor();
+    if(state.module==="co2") c.innerHTML=fleetCO2();
+    if(state.module==="docs") c.innerHTML=fleetDocs();
+  }
+  if(state.role==="user"){
+    if(state.module==="mycar") c.innerHTML=userMycar();
+    if(state.module==="service") c.innerHTML=userService();
+    if(state.module==="mydocs") c.innerHTML=userDocs();
+    if(state.module==="privacy") c.innerHTML=userPrivacy();
+  }
+  if(state.role==="sales"){
+    if(state.module==="customer") c.innerHTML=salesCustomer();
+    if(state.module==="units") c.innerHTML=salesUnits();
+    if(state.module==="care") c.innerHTML=salesCare();
+    if(state.module==="orders") c.innerHTML=salesOrders();
+    if(state.module==="salesdocs") c.innerHTML=salesDocs();
+  }
+  attachVehicleClicks();
+}
+
+function attachVehicleClicks(){
+  document.querySelectorAll("[data-vehicle]").forEach(el=>{
+    el.onclick = ()=>openVehicleModal(parseInt(el.dataset.vehicle,10));
+  });
+}
+
+
+let scenarioState = {models:false, charging:false, service:false};
+
+function showToast(text){
+  const t=document.getElementById("toast");
+  if(!t) return;
+  t.textContent=text;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+function toggleScenario(btn){
+  const key=btn.dataset.scenario;
+  scenarioState[key]=!scenarioState[key];
+  btn.classList.toggle("on", scenarioState[key]);
+  const active=Object.values(scenarioState).filter(Boolean).length;
+  const co2 = -8 - (scenarioState.models?18:0) - (scenarioState.charging?3:0) - (scenarioState.service?1:0);
+  const eShare = 34 + (scenarioState.models?12:0);
+  const tco = 4.82 - (scenarioState.models?0.18:0) - (scenarioState.charging?0.07:0) - (scenarioState.service?0.06:0);
+  const report = 92 + active*2;
+  const co2El=document.getElementById("co2Kpi"), eEl=document.getElementById("eShareKpi"), tcoEl=document.getElementById("tcoKpi"), reportEl=document.getElementById("reportKpi"), prog=document.getElementById("scenarioProgress"), txt=document.getElementById("scenarioText");
+  if(co2El) co2El.textContent=co2+"%";
+  if(eEl) eEl.textContent=eShare+"%";
+  if(tcoEl) tcoEl.textContent=tco.toFixed(2).replace(".",",")+"M€";
+  if(reportEl) reportEl.textContent=Math.min(report,98)+"%";
+  if(prog) prog.style.width=(72+active*8)+"%";
+  if(txt) txt.textContent = active===0 ? "Aktiviere Maßnahmen, um ein KI-Szenario für CO₂, TCO und Berichtsstatus zu simulieren." : "KI-Szenario aktiv: "+active+" Maßnahme(n) berücksichtigt. Die Kennzahlen wurden demonstrativ neu berechnet.";
+  const sCo2=document.getElementById("summaryCo2"), sTco=document.getElementById("summaryTco"), sReport=document.getElementById("summaryReport");
+  if(sCo2) sCo2.textContent=co2+"%";
+  if(sTco) sTco.textContent=tco.toFixed(2).replace(".",",")+"M€";
+  if(sReport) sReport.textContent=active>0 ? "aktualisiert" : "Review";
+}
+
+function setReportPreview(type, btn){
+  document.querySelectorAll(".reportTab").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  const box=document.getElementById("reportPreview");
+  if(!box) return;
+  if(type==="tco"){
+    box.innerHTML = `<h4>TCO-Managementreport</h4><p>Die KI fasst Kostenentwicklung, Kostentreiber und Einsparpotenziale der Siemens-Flotte zusammen.</p><ul class="reportBullets"><li>Aktueller TCO Forecast: ${document.getElementById("tcoKpi")?.textContent || "4,82M€"}</li><li>Haupttreiber: Ladepreise, Servicefälle und Standzeiten</li><li>Empfehlung: Lade- und Servicecluster zuerst prüfen</li></ul>`;
+  } else if(type==="qbr"){
+    box.innerHTML = `<h4>QBR Summary für Kundenbetreuung</h4><p>Die Plattform bereitet eine Management-Zusammenfassung für das Kundengespräch vor.</p><ul class="reportBullets"><li>CO₂-/ESG-Status und TCO-Entwicklung</li><li>Offene Service- und Lieferstatuspunkte</li><li>Gemeinsam geteilte Dokumente für Flottenmanager und KAM</li></ul>`;
+  } else {
+    box.innerHTML = `<h4>CSRD-/ESG-Flottenbericht</h4><p>Die KI bereitet eine Berichtsvorschau aus geprüften Flotten-, Lade-, Kosten- und CO₂-/ESG-Daten vor.</p><ul class="reportBullets"><li>CO₂-Entwicklung der Siemens-Flotte im Zeitverlauf</li><li>E-Quote, Ersatzkandidaten und Ladebedarf</li><li>Hinweis: private Fahrten werden nicht in die Auswertung übernommen</li></ul>`;
+  }
+}
+
+function openVehicleModal(i){
+  const v = vehicleData[i];
+  document.getElementById("modalTitle").textContent = v.id;
+  document.getElementById("modalSub").textContent = v.model + " · Siemens Demo-Daten";
+  if(v.mode==="private" && state.role!=="user"){
+    document.getElementById("modalDetails").innerHTML = `
+      <div class="detail"><div class="label">Fahrer</div><b>ausgeblendet</b></div>
+      <div class="detail"><div class="label">Standort</div><b>Privatfahrt</b></div>
+      <div class="detail"><div class="label">Geschwindigkeit</div><b>nicht sichtbar</b></div>
+      <div class="detail"><div class="label">Fahrverhalten</div><b>nicht sichtbar</b></div>
+      <div class="detail"><div class="label">Service</div><b>${v.service}</b></div>
+      <div class="detail"><div class="label">CO₂</div><b>${v.co2}</b></div>`;
+    document.getElementById("modalExplain").textContent = "Governance: Private Fahrtdaten werden für Flottenmanager und Vertrieb maskiert. Sichtbar bleiben nur dienstlich notwendige oder aggregierte Informationen. Dadurch wird verhindert, dass private Fahrten getrackt werden.";
+  } else {
+    document.getElementById("modalDetails").innerHTML = `
+      <div class="detail"><div class="label">Fahrer</div><b>${v.driver}</b></div>
+      <div class="detail"><div class="label">Standort</div><b>${v.location}</b></div>
+      <div class="detail"><div class="label">Geschwindigkeit</div><b>${v.speed===null?"-":v.speed+" km/h"}</b></div>
+      <div class="detail"><div class="label">Fahrverhalten</div><b>${v.behavior}</b></div>
+      <div class="detail"><div class="label">Service</div><b>${v.service}</b></div>
+      <div class="detail"><div class="label">CO₂</div><b>${v.co2}</b></div>`;
+    document.getElementById("modalExplain").textContent = "Live-Daten werden vor der Nutzung geprüft. Standort- und Fahrdaten werden nur angezeigt, wenn sie zur Rolle und zum Nutzungskontext passen.";
+  }
+  document.getElementById("modal").classList.add("open");
+}
+
+function openTextModal(title, sub, text){
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalSub").textContent = sub;
+  document.getElementById("modalDetails").innerHTML = `
+    <div class="detail"><div class="label">Quelle</div><b>FleetHub AI</b></div>
+    <div class="detail"><div class="label">Status</div><b>prüfbar</b></div>
+    <div class="detail"><div class="label">Rolle</div><b>${roles[state.role].badge.replace("Rolle: ","")}</b></div>`;
+  document.getElementById("modalExplain").textContent = text;
+  document.getElementById("modal").classList.add("open");
+}
+document.getElementById("closeModal").onclick=()=>document.getElementById("modal").classList.remove("open");
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")e.currentTarget.classList.remove("open")});
+
+function resetChat(){
+  document.getElementById("chatMsgs").innerHTML = "";
+  addBot("Hallo, ich bin FleetHub AI. Ich antworte nur mit der Datensicht deiner aktuellen Rolle.");
+  const qp = document.getElementById("quickPrompts");
+  qp.innerHTML = "";
+  roles[state.role].prompts.forEach(p=>{
+    const b=document.createElement("button"); b.textContent=p; b.onclick=()=>ask(p); qp.appendChild(b);
+  });
+}
+
+function addBot(text){ const m=document.createElement("div"); m.className="msg bot"; m.textContent=text; document.getElementById("chatMsgs").appendChild(m); scrollChat(); }
+function addUser(text){ const m=document.createElement("div"); m.className="msg user"; m.textContent=text; document.getElementById("chatMsgs").appendChild(m); scrollChat(); }
+function scrollChat(){ const box=document.getElementById("chatMsgs"); box.scrollTop=box.scrollHeight; }
+
+function answer(q){
+  const query=q.toLowerCase();
+
+  const deniedPrivateFleet = "Das darf ich in dieser Rolle nicht anzeigen. Private Fahrten, private Routen und privates Fahrverhalten einzelner User Chooser sind durch die Governance- und Datenschutzlogik gesperrt. Ich kann nur dienstliche Live-Daten oder aggregierte Informationen auswerten.";
+
+  if(state.role==="fleet"){
+    if(query.includes("privat") || query.includes("anna") || query.includes("private fahrten") || query.includes("private route")) return deniedPrivateFleet;
+    if(query.includes("wo") || query.includes("standort") || query.includes("befinden")) return "Für dienstliche Fahrten sehe ich zulässige Live-Standorte: M-SI 2048E in München, DO-SI 3312 in Dortmund, B-SI 8801E in Berlin. Private Fahrten werden maskiert und nicht trackbar angezeigt.";
+    if(query.includes("service")) return "37 Siemens-Fahrzeuge haben erhöhten Servicebedarf. Priorität: München-Cluster mit 14 Fahrzeugen, danach Dortmund mit 9 Fahrzeugen. Empfehlung: Termine bündeln und Standzeiten reduzieren.";
+    if(query.includes("kosten") || query.includes("tco") || query.includes("kostenentwicklung")) return "Die TCO-Prognose für Q3 steigt um 4,2%. Haupttreiber sind höhere Ladepreise am Standort München, zusätzliche Servicefälle und längere Standzeiten. Ich empfehle zuerst Ladetarife, Ladezeitfenster und Servicecluster zu prüfen.";
+    if(query.includes("csrd") || query.includes("bericht") || query.includes("report")) return "Ich kann einen CSRD-/ESG-Flottenbericht als Demo vorbereiten. Grundlage sind geprüfte Telematik-, Lade-, Kosten-, Vertrags-, Service- und CO₂-/ESG-Daten. Private Fahrten werden nicht übernommen. Im Modul CO₂ / TCO kannst du eine automatisch vorbereitete Berichtsvorschau prüfen."; 
+    if(query.includes("co2") || query.includes("co₂") || query.includes("emission") || query.includes("fahrzeugmodelle") || query.includes("modelle") || query.includes("kaufen")) return "Zur Reduktion der CO₂-Belastung empfehle ich im Szenario 42 Ersatzkandidaten. Die Plattform vergleicht eigene OEM-Modelle und relevante Fremd-OEM-Modelle. Geeignet sind u. a. eine E-Limousine für Langstreckenprofile, ein Fremd-OEM-Modell mit hoher Reichweite und ein E-Transporter für planbare Standortfahrten. Erwartete CO₂-Reduktion im Szenario: 18%. Zusätzlich wären 9 Ladepunkte sinnvoll.";
+    if(query.includes("daten") || query.includes("zugriff")) return "Flottenmanager-Sicht: Gesamtflotte, Kosten, CO₂, Verträge, Servicezustand und dienstliche Live-Daten. Nicht sichtbar: private Fahrtrouten, private Standorte und privates Fahrverhalten einzelner User Chooser.";
+    return "Flottenmanager-Sicht: Ich unterstütze Flottensteuerung, Kostenentwicklung, CO₂-Szenarien, OEM-Modellvorschläge, Servicecluster und Datenqualitäts-Hinweise. Private Fahrtdaten bleiben gesperrt.";
+  }
+
+  if(state.role==="user"){
+    if(query.includes("andere") || query.includes("gesamtflotte") || query.includes("kosten") || query.includes("kund") || query.includes("fahrer")) return "Das darf ich in der User-Chooser-Rolle nicht anzeigen. Du siehst nur dein eigenes Fahrzeug, eigene Termine, eigene Dokumente und deine Privatsphäre-Einstellungen.";
+    if(query.includes("service") || query.includes("werkstatt")) return "Dein Fahrzeug M-SI 2048E sollte in 8 Tagen zum Service. Geeignet ist der Siemens Mobility Servicepartner, 2,1 km entfernt, mit 3 freien Slots diese Woche.";
+    if(query.includes("daten") || query.includes("flottenmanager") || query.includes("sieht")) return "Der Flottenmanager sieht dienstlich notwendige Fahrzeugdaten und aggregierte Informationen. Private Fahrten, private Routen und private Standortdetails bleiben geschützt.";
+    if(query.includes("wo") || query.includes("standort")) return "Du siehst nur den Standort deines eigenen Fahrzeugs: aktuell München, Siemens Campus. Andere Fahrzeuge oder Fahrer sind für dich nicht sichtbar.";
+    if(query.includes("spurhalte") || query.includes("assistenz") || query.includes("acc") || query.includes("tempomat")) return "In deiner Wissensbibliothek findest du FIN-basierte Videos und Dokumente zu den Assistenzsystemen deines konkreten Fahrzeugs, z. B. Adaptive Cruise Control und Spurhalteassistent. Ich zeige nur Funktionen, die zu deinem Fahrzeug M-SI 2048E passen.";
+    if(query.includes("video") || query.includes("wissensbibliothek") || query.includes("handbuch") || query.includes("dokument")) return "Unter Meine Dokumente findest du die Wissensbibliothek. Sie ist anhand deiner Fahrzeugidentifikationsnummer auf dein individuelles Fahrzeug zugeschnitten und enthält Videos, PDFs und Kurzanleitungen.";
+    return "User-Chooser-Sicht: Ich kann nur zu deinem eigenen Fahrzeug, Service, Werkstattvorschlägen, Dokumenten, Wissensbibliothek und Privatsphäre antworten.";
+  }
+
+  if(state.role==="sales"){
+    if(query.includes("standort") || query.includes("fahrer") || query.includes("wo") || query.includes("fahrverhalten") || query.includes("geschwindigkeit")) return "Das darf ich in der KAM-Rolle nicht anzeigen. Vertrieb und Key Account Management erhalten keine privaten Fahrerstandorte, Geschwindigkeiten oder Fahrverhaltensdaten. Sichtbar sind Kunden-, Vertrags-, Bestell- und Betreuungsinformationen.";
+    if(query.includes("tochter") || query.includes("einheiten") || query.includes("mobility") || query.includes("healthineers") || query.includes("smart infrastructure") || query.includes("digital industries")) return "KAM-Sicht: Kritisch sind Siemens Mobility wegen Servicecluster München, Smart Infrastructure wegen Ladebedarf und Digital Industries wegen TCO-Entwicklung. Healthineers ist aktuell stabil. Sichtbar sind nur Account-, Vertrags- und Vorgangsdaten, keine Fahrerstandorte."; 
+    if(query.includes("qbr") || query.includes("vorbereit")) return "Für den Siemens-QBR empfehle ich: ESG-Report aktualisieren, TCO-Szenario ergänzen, Servicefälle München bündeln, Lieferstatus der 28 Fahrzeuge aufnehmen und die wichtigsten Siemens-Einheiten separat adressieren. Die passenden Dokumente liegen im gemeinsamen Dokumentenraum.";
+    if(query.includes("unterlagen") || query.includes("dokument")) return "Es fehlen noch zwei Unterlagen für Siemens: finaler TCO-Anhang und aktualisierte Serviceübersicht München. Der ESG-Report ist heute geteilt worden.";
+    if(query.includes("offen") || query.includes("vorgänge")) return "Für Siemens AG sind 8 Vorgänge offen: QBR-Unterlagen, 3 Servicefälle München, Lieferstatus für 28 Fahrzeuge und 2 Dokumentenreviews.";
+    if(query.includes("vertrag") || query.includes("bestell")) return "KAM-Sicht: 14 aktive Verträge, 28 offene Fahrzeugbestellungen mit neuer Auslieferungsprognose und 3 QBR-Termine in den nächsten 30 Tagen.";
+    return "KAM-Sicht: Ich unterstütze Kundenbetreuung, offene Vorgänge, Vertrags-/Bestellstatus, QBR-Vorbereitung und Dokumente. Fahrerbezogene Live-Daten bleiben gesperrt.";
+  }
+}
+function ask(text){
+  addUser(text);
+  setTimeout(()=>addBot(answer(text)),250);
+}
+document.getElementById("sendBtn").onclick=()=>{
+  const input=document.getElementById("chatInput");
+  const text=input.value.trim();
+  if(text){ input.value=""; ask(text); }
+};
+document.getElementById("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("sendBtn").click()});
+
+document.querySelectorAll(".roleBtn").forEach(b=>b.onclick=()=>setRole(b.dataset.role));
+
+let tick=9;
+let routeProgress=[0.10,0.42,0.70];
+const routePoints=[
+  [{x:8,y:79},{x:20,y:70},{x:34,y:62},{x:48,y:50},{x:66,y:38},{x:92,y:26}],
+  [{x:12,y:22},{x:25,y:32},{x:42,y:45},{x:58,y:58},{x:76,y:73},{x:92,y:88}],
+  [{x:49,y:49},{x:54,y:37},{x:58,y:27},{x:62,y:10}]
+];
+function interpRoute(points,t){
+  t = ((t % 1) + 1) % 1;
+  const scaled=t*(points.length-1);
+  const i=Math.floor(scaled);
+  const frac=scaled-i;
+  const a=points[i], b=points[Math.min(i+1,points.length-1)];
+  return {x:a.x+(b.x-a.x)*frac, y:a.y+(b.y-a.y)*frac};
+}
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById("clock").textContent="Live · "+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  tick=tick<=2?9:tick-1;
+  document.querySelectorAll(".secs").forEach(e=>e.textContent=tick);
+
+  vehicleData[0].speed = Math.max(28, Math.min(86, vehicleData[0].speed + Math.floor(Math.random()*9)-3));
+  vehicleData[1].speed = Math.max(36, Math.min(98, vehicleData[1].speed + Math.floor(Math.random()*11)-5));
+  vehicleData[2].speed = Math.random() > .88 ? 9 : 0;
+
+  [0,1,2].forEach(i=>{
+    const sp=vehicleData[i].speed || 0;
+    routeProgress[i] += sp === 0 ? 0 : sp * 0.00034;
+    const pos=interpRoute(routePoints[i], routeProgress[i]);
+    const pin=document.getElementById("pin"+i);
+    if(pin){ pin.style.left=pos.x+"%"; pin.style.top=pos.y+"%"; }
+
+    const el=document.getElementById("speed"+i); if(el) el.textContent=sp+" km/h";
+    const table=document.getElementById("tableSpeed"+i); if(table) table.textContent=sp+" km/h";
+    const bar=document.getElementById("bar"+i); if(bar) bar.style.width=Math.max(5,Math.min(98,sp))+"%";
+  });
+
+  const own=document.getElementById("ownSpeed"); if(own) own.textContent=vehicleData[0].speed+" km/h";
+},1000);
+
+setRole("fleet");
+</script>
+</body>
+</html>
